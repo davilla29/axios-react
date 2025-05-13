@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "./axios";
 import "./Posts.css";
+import Loader from "./components/Loader";
+import ErrorMessage from "./components/ErrorMessage";
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
@@ -12,7 +14,7 @@ const Posts = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("/comments");
+      const response = await axios.get("/posts");
       setPosts(response.data);
     } catch (err) {
       console.error(err.message);
@@ -26,26 +28,23 @@ const Posts = () => {
     <>
       <h1>Here are blog comments</h1>
       <ul className="post-list">
-        {posts.map((post) => {
+        {posts.slice(0, 10).map((post) => {
           return (
             <li key={post.id} className="post-card">
-              <h4>Name: {post.name} </h4>
-              <h5>Email: {post.email} </h5>
-              <p> {post.body} </p>
+              <h4>
+                <strong>Title:</strong> {post.title}
+              </h4>
+              <p>
+                <strong>Content:</strong> {post.body}{" "}
+              </p>
             </li>
           );
         })}
       </ul>
 
-      {/* {loading !== false && <p>⏳ Loading posts...</p>} */}
-      {loading !== false && (
-        <div className="loading-spinner">
-          <div className="circle-loader"></div> Loading posts...
-        </div>
-      )}
+      {loading === true && <Loader />}
 
-      {/* {error !== "" && <p style={{ color: "red" }}>{error}</p>} */}
-      {error !== "" && <div className="error-message">{error}</div>}
+      <ErrorMessage message={error} />
     </>
   );
 };
