@@ -45,8 +45,13 @@ const Posts = () => {
       const firstItemIndex = lastItemIndex - itemPerPage;
       setVisibleItems(posts.slice(firstItemIndex, lastItemIndex));
       setLoading(false);
-    }, 500); // Delay added for transition effect
+    }, 900); // Delay added for transition effect
   };
+
+  const lastItemIndex = currentPage * itemPerPage;
+  const firstItemIndex = lastItemIndex - itemPerPage;
+  const start = posts.length === 0 ? 0 : firstItemIndex + 1;
+  const end = Math.min(lastItemIndex, posts.length);
 
   const totalPages = Math.ceil(posts.length / itemPerPage);
 
@@ -112,7 +117,7 @@ const Posts = () => {
   };
 
   const itemOptions = [];
-  for (let i = 10; i <= posts.length; i += 10) {
+  for (let i = 10; i <= posts.length; i += 5) {
     itemOptions.push(i);
   }
   if (
@@ -139,6 +144,9 @@ const Posts = () => {
             </option>
           ))}
         </select>
+      </div>
+      <div className="text-sm text-gray-600 mt-2 text-center">
+        Showing {start} to {end} of {posts.length} results
       </div>
 
       <nav className="pagination-container">
