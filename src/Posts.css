@@ -33,6 +33,16 @@
   line-height: 1.6;
 }
 
+.control-wrapper {
+  position: sticky;
+  top: 0;
+  background-color: white; /* Prevent content from showing through */
+  z-index: 1000; /* Ensure it stays on top of other content */
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+
 /* Spinner */
 .loading-spinner {
   position: fixed;

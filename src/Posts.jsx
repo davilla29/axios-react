@@ -3,6 +3,8 @@ import axios from "./axios";
 import "./Posts.css";
 import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
+import StaggeredWrapper from "./components/StaggeredWrapper";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
@@ -38,21 +40,17 @@ const Posts = () => {
     }
   };
 
-  const showPageItems = () => {
-    setLoading(true);
-    setTimeout(() => {
-      const lastItemIndex = currentPage * itemPerPage;
-      const firstItemIndex = lastItemIndex - itemPerPage;
-      setVisibleItems(posts.slice(firstItemIndex, lastItemIndex));
-      setLoading(false);
-    }, 900); // Delay added for transition effect
-  };
-
   const lastItemIndex = currentPage * itemPerPage;
   const firstItemIndex = lastItemIndex - itemPerPage;
+
+  const showPageItems = () => {
+    setLoading(true);
+    setVisibleItems(posts.slice(firstItemIndex, lastItemIndex));
+    setLoading(false);
+  };
+
   const start = posts.length === 0 ? 0 : firstItemIndex + 1;
   const end = Math.min(lastItemIndex, posts.length);
-
   const totalPages = Math.ceil(posts.length / itemPerPage);
 
   const handlePrev = () => {
@@ -129,59 +127,76 @@ const Posts = () => {
 
   return (
     <>
-      <h1>Here are blog posts</h1>
+      <div className="control-wrapper">
+        <h1>Here are blog posts</h1>
 
-      <div className="control-bar">
-        <label htmlFor="itemLimit">Items per page:</label>
-        <select
-          id="itemLimit"
-          value={itemPerPage}
-          onChange={handleItemPerPageChange}
-        >
-          {itemOptions.map((num) => (
-            <option key={num} value={num}>
-              {num}
-            </option>
-          ))}
-        </select>
+        <div className="control-bar">
+          <label htmlFor="itemLimit">Items per page:</label>
+          <select
+            id="itemLimit"
+            value={itemPerPage}
+            onChange={handleItemPerPageChange}
+          >
+            {itemOptions.map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="text-sm text-gray-600 mt-2 text-center">
+          Showing {start} to {end} of {posts.length} results
+        </div>
+        <nav className="pagination-container">
+          <button
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+            className="pagination-button"
+          >
+            Previous
+          </button>
+          {renderPagination()}
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className="pagination-button"
+          >
+            Next
+          </button>
+        </nav>
       </div>
-      <div className="text-sm text-gray-600 mt-2 text-center">
-        Showing {start} to {end} of {posts.length} results
-      </div>
-
-      <nav className="pagination-container">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="pagination-button"
-        >
-          Previous
-        </button>
-        {renderPagination()}
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="pagination-button"
-        >
-          Next
-        </button>
-      </nav>
 
       {loading ? (
         <Loader />
       ) : (
-        <ul className="post-list fade-in">
-          {visibleItems.map((post) => (
-            <li key={post.id} className="post-card">
-              <h4>
-                <strong>Title:</strong> {post.title}
-              </h4>
-              <p>
-                <strong>Content:</strong> {post.body}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <AnimatePresence mode="wait">
+          <motion.ul
+            key={currentPage}
+            className="post-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {visibleItems.map((post) => (
+              <StaggeredWrapper
+                key={post.id}
+                direction="left"
+                staggerDelay={0.1}
+                duration={0.5}
+              >
+                <li className="post-card">
+                  <h4>
+                    <strong>Title:</strong> {post.title}
+                  </h4>
+                  <p>
+                    <strong>Content:</strong> {post.body}
+                  </p>
+                </li>
+              </StaggeredWrapper>
+            ))}
+          </motion.ul>
+        </AnimatePresence>
       )}
 
       <ErrorMessage message={error} />
